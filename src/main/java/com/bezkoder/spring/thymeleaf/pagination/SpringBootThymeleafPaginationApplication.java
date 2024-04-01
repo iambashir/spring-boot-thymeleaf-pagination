@@ -8,6 +8,7 @@ public class SpringBootThymeleafPaginationApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootThymeleafPaginationApplication.class, args);
+		System.out.println("Project Started successfully ..........");
 	}
 
 }
