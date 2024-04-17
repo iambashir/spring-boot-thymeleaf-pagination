@@ -1,5 +1,6 @@
 package com.bezkoder.spring.thymeleaf.pagination.controller;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,6 +54,47 @@ public class TutorialController {
 
     return "tutorials";
   }
+
+  @PostMapping("/tutorial")
+  public String getTutorialsByDate(Model model,
+                                   @RequestParam(required = false) String keyword,
+                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                                   @RequestParam(defaultValue = "1") int page,
+                                   @RequestParam(defaultValue = "3") int size) {
+    try {
+      List<Tutorial> tutorials = new ArrayList<>();
+      Pageable paging = PageRequest.of(page - 1, size);
+      Page<Tutorial> pageTuts;
+
+      if (startDate != null && endDate != null) {
+        // If start and end dates are provided, use the findByCreateDateBetweenAndActiveStatus method
+        pageTuts = (Page<Tutorial>) tutorialRepository.findByCreateDateBetweenAndActiveStatus(startDate, endDate, 1, paging);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+      } else if (keyword != null && !keyword.isEmpty()) {
+        // If keyword is provided, use findByTitleContainingIgnoreCase method
+        pageTuts = tutorialRepository.findByTitleContainingIgnoreCase(keyword, paging);
+        model.addAttribute("keyword", keyword);
+      } else {
+        // Otherwise, fallback to findAll method
+        pageTuts = tutorialRepository.findAll(paging);
+      }
+
+      tutorials = pageTuts.getContent();
+
+      model.addAttribute("tutorials", tutorials);
+      model.addAttribute("currentPage", pageTuts.getNumber() + 1);
+      model.addAttribute("totalItems", pageTuts.getTotalElements());
+      model.addAttribute("totalPages", pageTuts.getTotalPages());
+      model.addAttribute("pageSize", size);
+    } catch (Exception e) {
+      model.addAttribute("message", e.getMessage());
+    }
+
+    return "tutorials";
+  }
+
 
   @GetMapping("/tutorials/new")
   public String addTutorial(Model model) {

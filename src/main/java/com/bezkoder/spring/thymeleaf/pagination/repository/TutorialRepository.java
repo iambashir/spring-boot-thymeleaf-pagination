@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 
 import com.bezkoder.spring.thymeleaf.pagination.entity.Tutorial;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Repository
 @Transactional
 public interface TutorialRepository extends JpaRepository<Tutorial, Integer> {
@@ -19,4 +22,7 @@ public interface TutorialRepository extends JpaRepository<Tutorial, Integer> {
   @Query("UPDATE Tutorial t SET t.published = :published WHERE t.id = :id")
   @Modifying
   public void updatePublishedStatus(Integer id, boolean published);
+
+  List<Tutorial> findByCreateDateBetweenAndActiveStatus(LocalDate startDate, LocalDate endDate, int status, Pageable pageable);
+
 }
