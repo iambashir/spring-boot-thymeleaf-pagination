@@ -11,11 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "tutorials")
-public class Tutorial {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
+public class Tutorial extends BaseEntity{
 
   @Column(length = 128, nullable = false)
   private String title;
